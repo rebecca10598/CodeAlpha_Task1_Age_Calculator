@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Calculator</title>
+    <link rel="icon" href="./images/faviconcalc.ico" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+    
+        body {
+            background: url('./images/img.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        /* for age calculator container */
+        .custom-shadow {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <!-- Age Calculator Container -->
+    <div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full custom-shadow">
+        <h1 class="text-3xl font-bold text-center mb-6 text-black-600">AGE CALCULATOR</h1>
+        <!-- User Input Fields -->
+        <div class="grid grid-cols-3 gap-4 mb-4">
+            <input type="number" id="day" placeholder="Day" min="1" max="31" class="border border-gray-300 p-2 rounded">
+            <input type="number" id="month" placeholder="Month" min="1" max="12" class="border border-gray-300 p-2 rounded">
+            <input type="number" id="year" placeholder="Year" min="1900" class="border border-gray-300 p-2 rounded">
+        </div>
+        <!-- Calculate Button -->
+        <button onclick="calculateAge()" class="w-full bg-black text-white py-2 rounded hover:bg-gray-800">Calculate your Age</button>
+        <!-- Output Area -->
+        <div id="result" class="mt-6 text-lg text-gray-800">
+            <!-- Age Results Grid -->
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div class="p-4 bg-gray-100 rounded shadow">
+                    <h2 class="text-xl font-semibold text-center">Years:</h2>
+                    <p id="ageYears" class="text-center text-2xl font-bold">0</p> 
+                </div>
+                <div class="p-4 bg-gray-100 rounded shadow">
+                    <h2 class="text-xl font-semibold text-center">Months:</h2>
+                    <p id="ageMonths" class="text-center text-2xl font-bold">0</p> 
+                </div>
+                <div class="p-4 bg-gray-100 rounded shadow">
+                    <h2 class="text-xl font-semibold text-center">Days:</h2>
+                    <p id="ageDays" class="text-center text-2xl font-bold">0</p> 
+                </div>
+            </div>
+            <!-- Display User Age Message -->
+            <p id="ageMessage" class="text-center text-lg font-semibold"></p>
+            <!-- Additional Features Grid -->
+            <div id="additionalResults" class="grid grid-cols-1 gap-4 mt-6 text-lg text-gray-800">
+                <div class="p-4 bg-gray-200 rounded shadow">
+                    <h2 class="text-xl font-semibold text-center">Days until your next Birthday:</h2>
+                    <p id="daysUntilBirthday" class="text-center text-lg font-bold">0</p> 
+                </div>
+                <div class="p-4 bg-gray-200 rounded shadow">
+                    <h2 class="text-xl font-semibold text-center">Leap years you have lived through:</h2>
+                    <p id="leapYearsLived" class="text-center text-lg font-bold">0</p> 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Section -->
+    <script>
+        function calculateAge() 
+        {
+            // Get user input
+            const day = parseInt(document.getElementById('day').value);
+            const month = parseInt(document.getElementById('month').value) - 1; // JavaScript months are 0-based
+            const year = parseInt(document.getElementById('year').value);
+
+            // Validate input
+            if (!day || isNaN(month) || !year) 
+            {
+                document.getElementById('additionalResults').innerHTML = "<p class='text-center font-bold'>Please enter a valid date.</p>";
+                return;
+            }
+
+            const today = new Date();
+            const birthDate = new Date(year, month, day);
+
+            if (birthDate > today) 
+            {
+                document.getElementById('additionalResults').innerHTML = "<p class='text-center font-bold'>Birth Date cannot be in the future!</p>";
+                return;
+            }
+
+            // Calculate age
+            let ageYears = today.getFullYear() - birthDate.getFullYear();
+            let ageMonths = today.getMonth() - birthDate.getMonth();
+            let ageDays = today.getDate() - birthDate.getDate();
+
+            // Adjust if current month/day has not reached birth month/day
+            if (ageMonths < 0) {
+                ageYears--;
+                ageMonths += 12;
+            }
+
+            if (ageDays < 0) {
+                ageMonths--;
+                // Get the previous month
+                const previousMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                ageDays += previousMonth.getDate();
+            }
+
+            // Display calculated age
+            document.getElementById('ageYears').textContent = ageYears;
+            document.getElementById('ageMonths').textContent = ageMonths;
+            document.getElementById('ageDays').textContent = ageDays;
+
+            document.getElementById('ageMessage').textContent = `You are ${ageYears} years, ${ageMonths} months, and ${ageDays} days old.`;
+
+            // Additional Feature 1: Calculate until the next Birthday
+            calculateNextBirthday(birthDate);
+
+            // Additional Feature 2: Calculate Leap Years Lived
+            calculateLeapYearsLived(year);
+        }
+
+        // Additional Feature 1: Calculate Days until the next Birthday
+        function calculateNextBirthday(birthDate) 
+        {
+            const today = new Date();
+            let nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+
+            // If birthday has already passed this year, set for next year
+            if (today > nextBirthday) 
+            {
+                nextBirthday.setFullYear(today.getFullYear() + 1);
+            }
+
+            const daysUntilBirthday = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
+            document.getElementById('daysUntilBirthday').textContent = `${daysUntilBirthday} days`; 
+        }
+
+        // Additional Feature 2: Calculate Leap Years Lived
+        function calculateLeapYearsLived(startYear) 
+        {
+            const currentYear = new Date().getFullYear();
+            let leapYearsCount = 0;
+
+            for (let year = startYear; year <= currentYear; year++) 
+            {
+                if ((year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)) 
+                {
+                    leapYearsCount++;
+                }
+            }
+
+            document.getElementById('leapYearsLived').textContent = `${leapYearsCount} leap years`; 
+        }
+    </script>
+</body>
+</html>
